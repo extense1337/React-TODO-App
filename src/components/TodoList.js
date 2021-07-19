@@ -10,7 +10,8 @@ class TodoList extends React.Component {
     };
 
     async componentDidMount() {
-        const todosUrl = `https://jsonplaceholder.typicode.com/todos?userId=${this.props.userId}`;
+        //const todosUrl = `https://jsonplaceholder.typicode.com/todos?userId=${this.props.userId}`;
+        const todosUrl = `http://localhost:1337/todos?userId=${this.props.userId}`;
         const requestResult = await fetch(todosUrl);
         const todos = await requestResult.json();
         this.setState({todos});

@@ -15,19 +15,23 @@ class LoginForm extends React.Component {
         const username = this.state.username;
         const password = this.state.password;
 
-        const requestUrl = `https://jsonplaceholder.typicode.com/users?username=${username}&website=${password}`;
+        //const requestUrl = `https://jsonplaceholder.typicode.com/users?username=${username}&website=${password}`;
+        const requestUrl = `http://localhost:1337/users?username=${username}&password=${password}`;
 
-        const responseResult = await fetch(requestUrl);
-        const userJson = await responseResult.json();
+        try {
+            const responseResult = await fetch(requestUrl);
+            const userJson = await responseResult.json();
 
-        const {handleLoginClick} = this.props;
-        const {setUserId} = this.props;
-        if(userJson[0] !== undefined) {
-            setUserId(userJson[0].id);
-            handleLoginClick(true);
-        }
-        else {
-            this.setState({ isFailedLogIn: true })
+            const {handleLoginClick} = this.props;
+            const {setUserId} = this.props;
+            if (userJson[0] !== undefined) {
+                setUserId(userJson[0].id);
+                handleLoginClick(true);
+            } else {
+                this.setState({isFailedLogIn: true})
+            }
+        } catch(e) {
+            console.log(e);
         }
     }
 
