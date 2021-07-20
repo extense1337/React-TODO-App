@@ -9,7 +9,6 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true}));
 
 app.get('/users', function(request, response) {
-    if(!request.body) return response.sendStatus(400);
     const users = require('./data/users.json');
 
     if(Object.keys(request.query).length === 0) {
@@ -29,7 +28,6 @@ app.get('/users', function(request, response) {
 });
 
 app.get('/todos', function(request, response) {
-    if(!request.body) return response.sendStatus(400);
     const todos = require('./data/todos.json');
 
     if(Object.keys(request.query).length === 0) {
