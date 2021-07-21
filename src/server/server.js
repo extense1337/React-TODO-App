@@ -1,46 +1,32 @@
 const express = require("express");
 const cors = require("cors");
-const path = require("path");
-const app = express();
+const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
+
+const app = express();
+const port = 1337;
+const mongoUri = "mongodb+srv://extense:zYF-kv8-rc6-6K2@cluster0.clouc.mongodb.net/mernTodoApp_mongoDb?retryWrites=true&w=majority";
 
 app.use(cors());
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true}));
+app.use(bodyParser.urlencoded({extended: true}));
+app.use("/users", require("./routes/users.routes"));
+app.use("/todos", require("./routes/todos.routes"));
 
-app.get('/users', function(request, response) {
-    const users = require('./data/users.json');
+async function start() {
+    try {
+        await mongoose.connect(mongoUri, {
+            useNewUrlParser: true,
+            useUnifiedTopology: true,
+            useCreateIndex: true
+        })
 
-    if(Object.keys(request.query).length === 0) {
-        const fileName = path.resolve(__dirname, "./data/users.json");
-        response.sendFile(fileName, {});
-        return;
+        app.listen(port, () => console.log(`Node js server started on port ${port}!`));
+
+    } catch (e) {
+        console.log("Server error", e.message);
+        process.exit();
     }
+}
 
-    const {username, password} = request.query;
-    const user = users.filter(user => user.username === username && user.password === password);
-
-    if(!users) {
-        response.status(500).send('username didnt found');
-    }
-
-    response.end(JSON.stringify(user, null, '  '));
-});
-
-app.get('/todos', function(request, response) {
-    const todos = require('./data/todos.json');
-
-    if(Object.keys(request.query).length === 0) {
-        const fileName = path.resolve(__dirname, "./data/todos.json");
-        response.sendFile(fileName, {});
-        return;
-    }
-
-    const {userId} = request.query;
-    const userTodos = todos.filter(todo => todo.userId == userId);
-
-    response.end(JSON.stringify(userTodos, null, '  '));
-});
-
-const port = 1337;
-app.listen(port, () => console.log(`Node js server started on port ${port}!`));
+start()
