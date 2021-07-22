@@ -15,7 +15,6 @@ class LoginForm extends React.Component {
         const username = this.state.username;
         const password = this.state.password;
 
-        //const requestUrl = `https://jsonplaceholder.typicode.com/users?username=${username}&website=${password}`;
         const requestUrl = `http://localhost:1337/users?username=${username}&password=${password}`;
 
         try {
