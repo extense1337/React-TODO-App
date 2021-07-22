@@ -20,7 +20,7 @@ async function start() {
             useUnifiedTopology: true,
             useCreateIndex: true,
             useFindAndModify: false
-        })
+        });
 
         app.listen(port, () => console.log(`Node js server started on port ${port}!`));
 
