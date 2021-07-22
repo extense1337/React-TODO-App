@@ -64,7 +64,7 @@ router.delete('/', async (request, response) => {
     }
 });
 
-// PUT: /todos to update todо's title
+// PUT: /todos to update todо
 router.put('/', async (request, response) => {
     try {
         const {userId, id, title, completed} = request.body;
