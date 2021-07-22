@@ -26,10 +26,12 @@ router.post('/', async (request, response) => {
     try {
         const {userId, id, title, completed} = request.body;
 
+        if (!id) return response.status(400).json({message: "Wrong id!"});
+
         const possibleTodo = await Todo.findOne({id: id});
 
         if (possibleTodo) {
-            return response.status(400).json({message: "Todo id is already exists!"})
+            return response.status(400).json({message: "Todo id is already exists!"});
         }
 
         const newTodo = new Todo({

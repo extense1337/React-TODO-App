@@ -2,6 +2,8 @@ import React from "react";
 import TodoUnit from "./TodoUnit";
 import "../style/style.css";
 import TodoAdd from "./TodoAdd";
+import { confirmAlert } from 'react-confirm-alert';
+import 'react-confirm-alert/src/react-confirm-alert.css';
 
 class TodoList extends React.Component {
 
@@ -10,43 +12,107 @@ class TodoList extends React.Component {
     };
 
     async componentDidMount() {
+        await this.updateTodos();
+    };
+
+    updateTodos = async () => {
         const todosUrl = `http://localhost:1337/todos?userId=${this.props.userId}`;
         const requestResult = await fetch(todosUrl);
         const todos = await requestResult.json();
         this.setState({todos});
-    }
+    };
 
     handleLoginClick = () => {
         const {handleLoginClick} = this.props;
         handleLoginClick(false);
     };
 
-    toggleCompleted = id => {
+    toggleCompleted = async id => {
         const todos = [...this.state.todos];
         const todo = todos.filter(todo => todo.id === id)[0];
-        const index = todos.map(function(e) { return e.id; }).indexOf(id);
         todo.completed = !todo.completed;
-        todos[index] = todo;
-        this.setState({todos});
-    };
 
-    addTodo = todo => {
-        const todos = [...this.state.todos];
-
-        todos.push({
-            id: todos.length !==0 ? todos[todos.length-1].id + 1 : 0,
-            title: todo,
-            completed: false
+        await fetch('http://localhost:1337/todos', {
+            method: 'PUT',
+            mode: 'cors',
+            cache: 'no-cache',
+            credentials: 'same-origin',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            redirect: 'follow',
+            referrerPolicy: 'no-referrer',
+            body: JSON.stringify(todo)
         });
 
-        this.setState({todos});
+        await this.updateTodos();
     };
 
-    deleteTodo = id => {
-        this.setState({
-            todos: this.state.todos.filter(todo => todo.id !== id)
-        })
+    addTodo = async todo => {
+        const id = await this.getLastId();
+        const newTodo = {
+            userId: this.props.userId,
+            id: id,
+            title: todo,
+            completed: false
+        };
+
+        await fetch('http://localhost:1337/todos', {
+            method: 'POST',
+            mode: 'cors',
+            cache: 'no-cache',
+            credentials: 'same-origin',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            redirect: 'follow',
+            referrerPolicy: 'no-referrer',
+            body: JSON.stringify(newTodo)
+        });
+
+        await this.updateTodos();
     };
+
+    confirmDeleting = id => {
+        confirmAlert({
+            title: 'Confirm to delete',
+            message: 'Are you sure you want to delete this todo?',
+            buttons: [
+                {
+                    label: 'Yes',
+                    onClick: () => this.deleteTodo(id)
+                },
+                {
+                    label: 'No',
+                    onClick: () => 1
+                }
+            ]
+        });
+    };
+
+    deleteTodo = async id => {
+        await fetch('http://localhost:1337/todos', {
+            method: 'DELETE',
+            mode: 'cors',
+            cache: 'no-cache',
+            credentials: 'same-origin',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            redirect: 'follow',
+            referrerPolicy: 'no-referrer',
+            body: JSON.stringify({id: id})
+        });
+
+        await this.updateTodos();
+    };
+
+    getLastId = async () => {
+        const todosUrl = 'http://localhost:1337/todos';
+        const requestResult = await fetch(todosUrl);
+        const todos = await requestResult.json();
+        return todos[todos.length - 1]['id'] + 1;
+    }
 
     render() {
         const {todos} = this.state;
@@ -66,7 +132,7 @@ class TodoList extends React.Component {
                             todo = {todo}
                             key={todo.id}
                             toggleCompleted={() => this.toggleCompleted(todo.id)}
-                            deleteTodo={() => this.deleteTodo(todo.id)}
+                            deleteTodo={() => this.confirmDeleting(todo.id)}
                         />)}
                 </ul>
             </div>
