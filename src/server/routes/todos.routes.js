@@ -2,8 +2,8 @@ const {Router} = require("express")
 const router = Router();
 const Todo = require("../models/Todo");
 
-// Simple /todos to get all todos +
-// Parameterized /todos to get todos by userId
+// GET: Simple /todos to get all todos +
+// GET: Parameterized /todos to get todos by userId
 router.get('/', async (request, response) => {
     try {
         if(Object.keys(request.query).length === 0) {
@@ -17,11 +17,11 @@ router.get('/', async (request, response) => {
         response.end(JSON.stringify(userTodos, null, '  '));
 
     } catch (e) {
-        response.status(500).json({message: 'Todo adding is failed'});
+        response.status(500).json({message: 'Todo adding is failed!'});
     }
 });
 
-// Post /todos to add todo
+// POST: /todos to add todо
 router.post('/', async (request, response) => {
     try {
         const {userId, id, title, completed} = request.body;
@@ -29,7 +29,7 @@ router.post('/', async (request, response) => {
         const possibleTodo = await Todo.findOne({id: id});
 
         if (possibleTodo) {
-            return response.status(400).json({message: "Todo id is already exists"})
+            return response.status(400).json({message: "Todo id is already exists!"})
         }
 
         const newTodo = new Todo({
@@ -41,14 +41,49 @@ router.post('/', async (request, response) => {
 
         await newTodo.save();
 
-        response.status(201).json({message: "Todo added"});
+        response.status(201).json({message: 'Todo added'});
 
     } catch (e) {
-        response.status(500).json({message: 'Todo adding is failed'});
+        response.status(500).json({message: 'Todo adding is failed!'});
     }
 });
 
-// Post /users to add users from array || Created to initialize data
+// DELETE: /todos to delete todо from database
+router.delete('/', async (request, response) => {
+    try {
+        const {id} = request.body;
+
+        await Todo.findOneAndDelete({id: id}, function (err, doc) {
+            if (err) return response.send(500).json({error: err});
+            return response.status(201).json({message: 'Todo successfully deleted.'});
+        });
+    } catch (e) {
+        response.status(500).json({message: 'Todo deleting is failed!'});
+    }
+});
+
+// PUT: /todos to update todо's title
+router.put('/', async (request, response) => {
+    try {
+        const {userId, id, title, completed} = request.body;
+
+        if (!title) return response.status(500).json({message: 'Todos new title is empty or undefined!'});
+
+        await Todo.replaceOne({ id }, {
+            userId: userId,
+            id: id,
+            title: title,
+            completed: completed
+        });
+
+        response.status(200).json({message: 'Todo successfully updated.'});
+
+    } catch (e) {
+        response.status(500).json({message: 'Todo updating is failed!'});
+    }
+});
+
+// POST: /users to add users from array || Created to initialize data
 router.post('/todosArrayInit', async (request, response) => {
     try {
         const todos = request.body;
